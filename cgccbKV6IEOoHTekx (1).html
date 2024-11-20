@@ -1,0 +1,373 @@
+<html><head><base href="https://yourwebsite.com/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Social Network</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            height: 100%;
+            font-family: 'Roboto Mono', monospace;
+            background-color: #000;
+            color: #0F0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Binary Rain Background */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+        }
+        @keyframes binaryRain {
+            from { transform: translateY(0); }
+            to { transform: translateY(100%); }
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: rgba(0, 255, 0, 0.2);
+            padding: 10px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            z-index: 10;
+        }
+        .navbar button {
+            background-color: transparent;
+            color: #0F0;
+            border: 2px solid #0F0;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .navbar button:hover {
+            background-color: #0F0;
+            color: #000;
+        }
+
+        /* Container Styles */
+        .container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,255,0,0.7);
+            max-width: 400px;
+            width: 90%;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .hidden {
+            opacity: 0;
+            transform: translate(-50%, -60%);
+            pointer-events: none;
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #0F0;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            color: #0F0;
+        }
+        input {
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #0F0;
+            border-radius: 8px;
+            background: transparent;
+            color: #0F0;
+            caret-color: #0F0;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+        input::placeholder {
+            color: #0F0;
+            opacity: 0.7;
+        }
+        input:focus {
+            border-color: #00FF00;
+            outline: none;
+            background-color: rgba(0, 255, 0, 0.1);
+        }
+        button[type="submit"], .container button {
+            padding: 12px;
+            background-color: #0F0;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 16px;
+        }
+        button[type="submit"]:hover, .container button:hover {
+            background-color: #00FF00;
+            color: #000;
+        }
+        p {
+            text-align: center;
+            margin-top: 10px;
+            color: #0F0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 500px) {
+            .container {
+                padding: 20px;
+            }
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .navbar button {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="binaryCanvas"></canvas>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <button data-target="registrationContainer">Регистрация</button>
+        <button data-target="loginContainer">Вход</button>
+        <button data-target="editProfileContainer">Редактировать профиль</button>
+        <button data-target="messagesContainer">Сообщения</button>
+    </div>
+
+    <!-- Registration Container -->
+    <div class="container" id="registrationContainer">
+        <h2>Регистрация</h2>
+        <form id="registrationForm">
+            <label for="reg_username">Имя пользователя</label>
+            <input type="text" id="reg_username" name="username" placeholder="Введите имя пользователя" required>
+
+            <label for="reg_email">Электронная почта</label>
+            <input type="email" id="reg_email" name="email" placeholder="Введите электронную почту" required>
+
+            <label for="reg_password">Пароль</label>
+            <input type="password" id="reg_password" name="password" placeholder="Введите пароль" required>
+
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+        <p>Есть аккаунт? <button data-target="loginContainer">Войти</button></p>
+    </div>
+
+    <!-- Login Container -->
+    <div class="container hidden" id="loginContainer">
+        <h2>Вход</h2>
+        <form id="loginForm">
+            <label for="login_username">Имя пользователя</label>
+            <input type="text" id="login_username" name="username" placeholder="Введите имя пользователя" required>
+
+            <label for="login_password">Пароль</label>
+            <input type="password" id="login_password" name="password" placeholder="Введите пароль" required>
+
+            <button type="submit">Войти</button>
+        </form>
+        <p>Нет аккаунта? <button data-target="registrationContainer">Зарегистрироваться</button></p>
+    </div>
+
+    <!-- Edit Profile Container -->
+    <div class="container hidden" id="editProfileContainer">
+        <h2>Редактировать профиль</h2>
+        <form id="editProfileForm">
+            <label for="edit_username">Имя пользователя</label>
+            <input type="text" id="edit_username" name="username" placeholder="Введите новое имя пользователя" required>
+
+            <label for="edit_email">Электронная почта</label>
+            <input type="email" id="edit_email" name="email" placeholder="Введите новую электронную почту" required>
+
+            <label for="edit_password">Новый пароль</label>
+            <input type="password" id="edit_password" name="password" placeholder="Введите новый пароль" required>
+
+            <button type="submit">Сохранить изменения</button>
+        </form>
+        <button id="logoutButton">Выйти</button>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="container hidden" id="messagesContainer">
+        <h2>Сообщения</h2>
+        <p>Система сообщений пока в разработке.</p>
+    </div>
+
+    <script>
+        // Binary Rain Animation
+        const canvas = document.getElementById('binaryCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Resize canvas to fill the window
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const binaryChars = '01';
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawBinaryRain() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px Roboto Mono';
+
+            for(let i = 0; i < drops.length; i++) {
+                const text = binaryChars[Math.floor(Math.random() * binaryChars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawBinaryRain, 33);
+
+        // Navigation Handling
+        const navButtons = document.querySelectorAll('.navbar button');
+        const containers = document.querySelectorAll('.container');
+
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const target = button.getAttribute('data-target');
+                containers.forEach(container => {
+                    if(container.id === target) {
+                        container.classList.remove('hidden');
+                    } else {
+                        container.classList.add('hidden');
+                    }
+                });
+            });
+        });
+
+        // Show specific container buttons
+        const toggleButtons = document.querySelectorAll('.container button[data-target]');
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const target = button.getAttribute('data-target');
+                containers.forEach(container => {
+                    if(container.id === target) {
+                        container.classList.remove('hidden');
+                        button.closest('.container').classList.add('hidden');
+                    } else {
+                        // Do nothing
+                    }
+                });
+            });
+        });
+
+        // Registration Form Handling
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('reg_username').value.trim();
+            const email = document.getElementById('reg_email').value.trim();
+            const password = document.getElementById('reg_password').value.trim();
+
+            if (username === '' || email === '' || password === '') {
+                alert('Пожалуйста, заполните все поля.');
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                alert('Пожалуйста, введите корректный email.');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('Пароль должен содержать как минимум 6 символов.');
+                return;
+            }
+
+            alert('Регистрация успешна!');
+            this.reset();
+            document.getElementById('registrationContainer').classList.add('hidden');
+            document.getElementById('loginContainer').classList.remove('hidden');
+        });
+
+        // Login Form Handling
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('login_username').value.trim();
+            const password = document.getElementById('login_password').value.trim();
+
+            if (username === '' || password === '') {
+                alert('Пожалуйста, заполните все поля.');
+                return;
+            }
+
+            // Placeholder for actual authentication
+            alert('Вход успешен!');
+            this.reset();
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('editProfileContainer').classList.remove('hidden');
+        });
+
+        // Edit Profile Form Handling
+        document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('edit_username').value.trim();
+            const email = document.getElementById('edit_email').value.trim();
+            const password = document.getElementById('edit_password').value.trim();
+
+            if (username === '' || email === '' || password === '') {
+                alert('Пожалуйста, заполните все поля.');
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                alert('Пожалуйста, введите корректный email.');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('Пароль должен содержать как минимум 6 символов.');
+                return;
+            }
+
+            alert('Профиль успешно обновлён!');
+            this.reset();
+        });
+
+        // Logout Handling
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            alert('Вы вышли из системы.');
+            document.getElementById('editProfileContainer').classList.add('hidden');
+            document.getElementById('registrationContainer').classList.remove('hidden');
+        });
+
+        // Email Validation Function
+        function validateEmail(email) {
+            const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@(([^<>()[\]\\.,;:\s@"]+\.)+[^<>()[\]\\.,;:\s@"]{2,})$/i;
+            return re.test(String(email).toLowerCase());
+        }
+    </script>
+</body>
+</html>
